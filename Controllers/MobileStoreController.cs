@@ -129,6 +129,50 @@ namespace MobileStore.Controllers
             return profitLossReport;
         }
 
+        [HttpGet]
+        [Route("BestPrice")]
+        public async Task<dynamic> GetBestPrizeReport()
+        {
+            var allReport = await _context.MobileInformation.ToListAsync();
+
+            var brands = BrandList(allReport);
+
+            var BestPrizeReport = new List<dynamic>();
+
+            foreach (var brand in brands)
+            {
+                List<BrandPrizeinformationDto> list = new List<BrandPrizeinformationDto>();
+                Decimal totalSaleprize = 0;
+                long count = 0;
+
+                foreach (var report in allReport)
+                {
+                    if (report.BrandName == brand)
+                    {
+                        totalSaleprize += report.SalePrize;
+                        count++;
+                        var informationReport = new BrandPrizeinformationDto
+                        {
+                            DateOfSale = report.DateOfSale,
+                            SalePrize = report.SalePrize
+                        };
+                        list.Add(informationReport);
+                    }
+                }
+
+                var brandReport = new BestPrizeReportDto
+                {
+                    Brand = brand,
+                    BestPrize = totalSaleprize/count,
+                    BrandList = list
+                };
+
+                BestPrizeReport.Add(brandReport);
+            }
+
+            return BestPrizeReport;
+        }
+
         private List<string> BrandList(List<MobileInformation> allReport)
         {
             List<string> brands = new List<string>();
